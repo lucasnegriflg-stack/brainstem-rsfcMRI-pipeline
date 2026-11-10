@@ -5,7 +5,7 @@
 %% ==========================================================
 clear; clc;
 spm('defaults','fmri'); spm_jobman('initcfg');
-fprintf('\n🧠 START: 4D EPI (realigned) → T1 Raum (mit meanEPI) [BATCH]\n\n');
+fprintf('\n START: 4D EPI (realigned) → T1 Raum (mit meanEPI) [BATCH]\n\n');
 
 %% ---------- 1) Dateien wählen (MultiSelect) ----------
 fprintf('Bitte wähle die Dateien (Mehrfachauswahl möglich):\n');
@@ -25,13 +25,13 @@ if isequal(fn_EPI,0), error('Abbruch (kein EPI gewählt).'); end
 if ischar(fn_EPI), fn_EPI = {fn_EPI}; end
 
 %% ---------- 2) Listen mit Subject-IDs bauen ----------
-fprintf('\n📂 Erzeuge Listen mit Subject-IDs aus Dateinamen...\n');
+fprintf('\n Erzeuge Listen mit Subject-IDs aus Dateinamen...\n');
 
 T1_list = struct('sid',{},'fname',{});
 for i = 1:numel(fn_T1)
     sid = get_subid_from_name(fn_T1{i});
     if isempty(sid)
-        fprintf('  ⚠️  T1-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_T1{i});
+        fprintf('    T1-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_T1{i});
         continue;
     end
     T1_list(end+1).sid   = sid; %#ok<SAGROW>
@@ -42,7 +42,7 @@ EPI_list = struct('sid',{},'fname',{});
 for i = 1:numel(fn_EPI)
     sid = get_subid_from_name(fn_EPI{i});
     if isempty(sid)
-        fprintf('  ⚠️  EPI-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_EPI{i});
+        fprintf('    EPI-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_EPI{i});
         continue;
     end
     EPI_list(end+1).sid   = sid; %#ok<SAGROW>
@@ -63,14 +63,14 @@ if isempty(common_sid)
     error('Keine gemeinsamen Subject-IDs in T1 und EPI gefunden.');
 end
 
-fprintf('\n✅ Gefundene gemeinsame Subjects:\n');
+fprintf('\n Gefundene gemeinsame Subjects:\n');
 disp(common_sid(:));
 
 %% ---------- 4) Loop über alle Subjects (Batch, ohne OK-Klicks) ----------
 for s = 1:numel(common_sid)
     sid = common_sid{s};
     fprintf('\n=============================================\n');
-    fprintf('▶ Verarbeite Subject: %s\n', sid);
+    fprintf(' Verarbeite Subject: %s\n', sid);
     fprintf('=============================================\n');
 
     % --- passende Dateien für dieses Subject holen ---
@@ -100,7 +100,7 @@ for s = 1:numel(common_sid)
     Vmean.fname = spm_file(EPI4D,'prefix','mean_');
     spm_write_vol(Vmean, Ymean);
     meanEPI = Vmean.fname;
-    fprintf('✅ meanEPI geschrieben: %s\n', meanEPI);
+    fprintf(' meanEPI geschrieben: %s\n', meanEPI);
 
     %% ---------- 3) QC vorher (optional, aber ohne msgbox) ----------
     try
@@ -129,7 +129,7 @@ for s = 1:numel(common_sid)
     V_after = spm_vol(meanEPI);
     M_after = V_after.mat;
     T = M_after / M_before;   % rigid Transform (meanEPI_before → T1)
-    fprintf('✅ Coreg-Schätzung ok. (Rigid Transform berechnet für %s)\n', sid);
+    fprintf(' Coreg-Schätzung ok. (Rigid Transform berechnet für %s)\n', sid);
 
     %% ---------- 5) Apply Transform: 4D-EPI → T1 Raum (linear) ----------
     fprintf('\n=== Wende Transform auf 4D-EPI an (%s) ===\n', sid);
@@ -154,12 +154,12 @@ for s = 1:numel(common_sid)
     spm_progress_bar('Clear');
 
     EPI_inT1 = spm_file(EPI4D,'prefix','cT1_');
-    fprintf('✅ Fertig (%s): %s (4D-EPI jetzt im T1-Raum)\n', sid, EPI_inT1);
+    fprintf(' Fertig (%s): %s (4D-EPI jetzt im T1-Raum)\n', sid, EPI_inT1);
 
-    fprintf('\n🏁 DONE für %s.\n', sid);
+    fprintf('\n DONE für %s.\n', sid);
 end
 
-fprintf('\n🎉 Alle Subjects abgearbeitet.\n');
+fprintf('\n Alle Subjects abgearbeitet.\n');
 
 %% ================== Helper-Funktionen ==================
 function sid = get_subid_from_name(fname)
