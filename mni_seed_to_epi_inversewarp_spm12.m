@@ -210,8 +210,8 @@ for k = 1:numel(ids)
     % optional QC:
     % spm_check_registration(char(epi, seed_clean_file));
 
-    fprintf('✅ Wrote seed:  %s (vox=%d)\n', seed_warp, vox_warped);
-    fprintf('✅ Wrote clean: %s (vox=%d)\n', seed_clean_file, vox_clean);
+    fprintf(' Wrote seed:  %s (vox=%d)\n', seed_warp, vox_warped);
+    fprintf(' Wrote clean: %s (vox=%d)\n', seed_clean_file, vox_clean);
 
     logRows(end+1,:) = {id, epi, yField, c3, seed_warp, seed_clean_file, vox_warped, vox_clean, char(note)}; %#ok<AGROW>
 end
@@ -230,6 +230,6 @@ catch
     end
     fclose(fid);
 end
-fprintf('\n📄 Log saved: %s\n', csvFile);
+fprintf('\n Log saved: %s\n', csvFile);
 fprintf('\nDone.\n');
 end
