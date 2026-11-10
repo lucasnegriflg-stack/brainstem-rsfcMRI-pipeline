@@ -4,7 +4,7 @@
 %% ==========================================================
 clear; clc;
 spm('defaults','fmri'); spm_jobman('initcfg');
-fprintf('\n🧠 START: LC Coregistration NM→T1 (Option B, präzise) [BATCH]\n\n');
+fprintf('\n START: LC Coregistration NM→T1 (Option B, präzise) [BATCH]\n\n');
 
 %% ---------- 1) Dateien wählen (MultiSelect) ----------
 fprintf('Bitte wähle die benötigten Dateien (Mehrfachauswahl möglich):\n');
@@ -31,13 +31,13 @@ if isequal(fn_LC,0), error('Abbruch (keine LC-Maske gewählt).'); end
 if ischar(fn_LC), fn_LC = {fn_LC}; end
 
 %% ---------- 2) Listen mit Subject-IDs bauen ----------
-fprintf('\n📂 Erzeuge Listen mit Subject-IDs aus Dateinamen...\n');
+fprintf('\n Erzeuge Listen mit Subject-IDs aus Dateinamen...\n');
 
 T1_list = struct('sid',{},'fname',{});
 for i = 1:numel(fn_T1)
     sid = get_subid_from_name(fn_T1{i});
     if isempty(sid)
-        fprintf('  ⚠️  T1-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_T1{i});
+        fprintf('    T1-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_T1{i});
         continue;
     end
     T1_list(end+1).sid   = sid; %#ok<SAGROW>
@@ -48,7 +48,7 @@ NM_list = struct('sid',{},'fname',{});
 for i = 1:numel(fn_NM)
     sid = get_subid_from_name(fn_NM{i});
     if isempty(sid)
-        fprintf('  ⚠️  NM-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_NM{i});
+        fprintf('    NM-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_NM{i});
         continue;
     end
     NM_list(end+1).sid   = sid; %#ok<SAGROW>
@@ -59,7 +59,7 @@ LC_list = struct('sid',{},'fname',{});
 for i = 1:numel(fn_LC)
     sid = get_subid_from_name(fn_LC{i});
     if isempty(sid)
-        fprintf('  ⚠️  LC-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_LC{i});
+        fprintf('    LC-Datei ohne erkennbaren Sub-Tag übersprungen: %s\n', fn_LC{i});
         continue;
     end
     LC_list(end+1).sid   = sid; %#ok<SAGROW>
@@ -81,7 +81,7 @@ if isempty(common_sid)
     error('Keine gemeinsamen Subject-IDs in T1, NM und LC-Masken gefunden.');
 end
 
-fprintf('\n✅ Gefundene gemeinsame Subjects:\n');
+fprintf('\n Gefundene gemeinsame Subjects:\n');
 disp(common_sid(:));
 
 %% ---------- 4) Loop über alle Subjects (Batch, ohne OK-Klicks) ----------
@@ -107,9 +107,9 @@ for s = 1:numel(common_sid)
     same_dim = all(V_NM.dim == V_LC.dim);
     same_mat = all(abs(V_NM.mat(:) - V_LC.mat(:)) < 1e-6);
     if same_dim && same_mat
-        fprintf('\n✅ Maske & NM haben identischen Header.\n');
+        fprintf('\n Maske & NM haben identischen Header.\n');
     else
-        fprintf('\n⚠️  Header unterschiedlich – kopiere NM-Header auf Maske (keine Interpolation)...\n');
+        fprintf('\n  Header unterschiedlich – kopiere NM-Header auf Maske (keine Interpolation)...\n');
         Y = spm_read_vols(V_LC);
         V_LC.mat   = V_NM.mat;
         V_LC.dim   = V_NM.dim;
@@ -146,7 +146,7 @@ for s = 1:numel(common_sid)
        [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
     matlabbatch{1}.spm.spatial.coreg.estimate.eoptions.fwhm     = [7 7];
     spm_jobman('run',matlabbatch);
-    fprintf('✅ Coreg estimate abgeschlossen (NM-Header aktualisiert) für %s.\n', sid);
+    fprintf(' Coreg estimate abgeschlossen (NM-Header aktualisiert) für %s.\n', sid);
 
     %% ---------- Transform auf LC-Maske übertragen ----------
     V_NM_after = spm_vol(NM);
@@ -156,11 +156,11 @@ for s = 1:numel(common_sid)
     fprintf('Übertrage NM→T1-Transform auf Maske (%s)...\n', sid);
     V_LC = spm_vol(LCmask);
     Y = spm_read_vols(V_LC);
-    V_LC.mat   = T * V_LC.mat;      % ⬅️ entscheidender Schritt
+    V_LC.mat   = T * V_LC.mat;      %  entscheidender Schritt
     V_LC.fname = spm_file(LCmask,'prefix',['xform_' sid '_']);
     spm_write_vol(V_LC,Y);
     LCmask_T1hdr = V_LC.fname;
-    fprintf('✅ Neue Maske mit Transform geschrieben: %s\n', LCmask_T1hdr);
+    fprintf(' Neue Maske mit Transform geschrieben: %s\n', LCmask_T1hdr);
 
     %% ---------- Reslice Maske (NN) ins T1-Gitter ----------
     fprintf('\n=== Reslice Maske (NN) in T1 für %s ===\n', sid);
@@ -174,7 +174,7 @@ for s = 1:numel(common_sid)
     spm_jobman('run',matlabbatch);
 
     LC_inT1 = spm_file(LCmask_T1hdr,'prefix','cT1_');
-    fprintf('✅ Fertig (%s): %s\n', sid, LC_inT1);
+    fprintf(' Fertig (%s): %s\n', sid, LC_inT1);
 
     %% ---------- QC nachher (ohne msgbox-Stop) ----------
     try
@@ -201,16 +201,16 @@ for s = 1:numel(common_sid)
     V_T1 = spm_vol(T1);
     same_pix = all(abs(diag(V_T1.mat(1:3,1:3)) - diag(Vmask.mat(1:3,1:3))) < 1e-6);
     if same_pix
-        fprintf('[POST-QC %s] Voxelraster identisch mit T1: JA ✅\n', sid);
+        fprintf('[POST-QC %s] Voxelraster identisch mit T1: JA \n', sid);
     else
-        fprintf('[POST-QC %s] Voxelraster identisch mit T1: NEIN ⚠️\n', sid);
+        fprintf('[POST-QC %s] Voxelraster identisch mit T1: NEIN \n', sid);
     end
     fprintf('[POST-QC %s] LC Voxels (binär): %d\n', sid, nnz(M));
 
-    fprintf('\n🏁 DONE für %s.\n', sid);
+    fprintf('\n DONE für %s.\n', sid);
 end
 
-fprintf('\n🎉 Alle Subjects abgearbeitet.\n');
+fprintf('\n Alle Subjects abgearbeitet.\n');
 
 %% ================== Helper-Funktionen ==================
 function sid = get_subid_from_name(fname)
