@@ -21,7 +21,7 @@
 
 clear; clc;
 spm('defaults','fmri'); spm_jobman('initcfg');
-fprintf('\n🧠 START: LC COM (L/R) → Seeds im EPI-Raum (mit Liquor-Cropping)\n\n');
+fprintf('\n START: LC COM (L/R) → Seeds im EPI-Raum (mit Liquor-Cropping)\n\n');
 
 %% ---------------- Parameter UI ----------------
 dlg = inputdlg( ...
@@ -71,7 +71,7 @@ if isempty(subs)
     return;
 end
 
-fprintf('✅ Gefundene Subjects mit vollständigem Set: %d\n', numel(subs));
+fprintf(' Gefundene Subjects mit vollständigem Set: %d\n', numel(subs));
 disp(subs');
 
 %% ---------------- 3) QC Log vorbereiten ----------------
@@ -200,9 +200,9 @@ for si = 1:numel(subs)
         V_L.descrip = sprintf('LC left seed (%.2fmm sphere, COM-based, CSF-cropped thr=%.2f)', radius_mm, thr);
         spm_write_vol(V_L, double(mask_L));
         seed_L_fname = V_L.fname;
-        fprintf('  ✅ wrote L seed: %s\n', seed_L_fname);
+        fprintf('   wrote L seed: %s\n', seed_L_fname);
     else
-        fprintf('  ⛔ L seed not written (0 vox after cropping)\n');
+        fprintf('   L seed not written (0 vox after cropping)\n');
     end
 
     if ~qc_fail_R
@@ -211,9 +211,9 @@ for si = 1:numel(subs)
         V_R.descrip = sprintf('LC right seed (%.2fmm sphere, COM-based, CSF-cropped thr=%.2f)', radius_mm, thr);
         spm_write_vol(V_R, double(mask_R));
         seed_R_fname = V_R.fname;
-        fprintf('  ✅ wrote R seed: %s\n', seed_R_fname);
+        fprintf('   wrote R seed: %s\n', seed_R_fname);
     else
-        fprintf('  ⛔ R seed not written (0 vox after cropping)\n');
+        fprintf('   R seed not written (0 vox after cropping)\n');
     end
 
     % ---------- QC Log (immer) ----------
