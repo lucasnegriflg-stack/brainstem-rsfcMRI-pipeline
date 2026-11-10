@@ -4,10 +4,10 @@ function LC_seedLR_to_voxel_native_batch_v2_3_1()
 %% PAPER-READY v2.3.1 — RSFC Seed-to-Voxel (native EPI space, L/R, BATCH)
 %% ==========================================================
 % v2.3.1 patches vs v2.3.0:
-%   ✅ PATCH 1: valid-mask not overly strict (finite policy handled later)
-%   ✅ PATCH 2: BandAmp metric no longer removes timepoints inside FFT (no ts(isfinite))
-%   ✅ PATCH 3: tmp-reslice is now FAIL-FAST if copy to tmp fails (prevents r* collisions on shares)
-%   ✅ PATCH 4: nValidCorrVox computed from final r_mask (nnz(isfinite(r_mask))) not nMask_good proxy
+%   PATCH 1: valid-mask not overly strict (finite policy handled later)
+%   PATCH 2: BandAmp metric no longer removes timepoints inside FFT (no ts(isfinite))
+%   PATCH 3: tmp-reslice is now FAIL-FAST if copy to tmp fails (prevents r* collisions on shares)
+%   PATCH 4: nValidCorrVox computed from final r_mask (nnz(isfinite(r_mask))) not nMask_good proxy
 %
 % Core properties:
 %   • Native EPI space workflow
@@ -125,7 +125,7 @@ if isempty(common_sid)
     error('No subjects with EPI + (LC_L or LC_R) found.');
 end
 
-fprintf('\n✅ Matched subjects (EPI + seed L/R):\n');
+fprintf('\n Matched subjects (EPI + seed L/R):\n');
 disp(common_sid(:));
 
 %% ---------- Master table ----------
@@ -230,7 +230,7 @@ clear Y4;
     if nMask < 1000
         warning('Analysis mask very small (%d vox). Check masks/preprocessing (%s).', nMask, sid);
     end
-    fprintf('✅ Using analysis mask (%s): %d voxels\n', string(mask_source), nMask);
+    fprintf(' Using analysis mask (%s): %d voxels\n', string(mask_source), nMask);
 
     %% ---------- Process sides ----------
     sides = {'L','R'};
@@ -287,7 +287,7 @@ clear Y4;
         Vq = Vseed;
         Vq.fname = fullfile(outdir, sprintf('QC_LC_%s_in_AnalysisMask_%s.nii', side, sid));
         spm_write_vol(Vq, reshape(overlay, [nx,ny,nz]));
-        fprintf('✅ QC overlay written: %s\n', Vq.fname);
+        fprintf(' QC overlay written: %s\n', Vq.fname);
 
         %% ---------- Seed time series (NaN-robust) ----------
         Yseed = Y2D_d(:, Mseed_use);  % [nt x nSeed_use], double
@@ -475,7 +475,7 @@ clear Y4;
             'TR','Effective_DF_exploratory'});
 
         writetable(T, csvfile);
-        fprintf('✅ QC CSV saved: %s\n', csvfile);
+        fprintf(' QC CSV saved: %s\n', csvfile);
 
         allRows = [allRows; T]; %#ok<AGROW>
 
@@ -506,7 +506,7 @@ clear Y4;
             fprintf(fid, '%s_band: [%.6f %.6f]\n', cfg.band_amp_name, cfg.band_amp_band(1), cfg.band_amp_band(2));
             fprintf(fid, '%s_value: %.6f\n', cfg.band_amp_name, LC_BandAmp_RS);
             fclose(fid);
-            fprintf('✅ Provenance log written: %s\n', prov_txt);
+            fprintf(' Provenance log written: %s\n', prov_txt);
         catch ME
             warning('Could not write provenance log: %s', ME.message);
         end
@@ -519,9 +519,9 @@ end
 if ~isempty(allRows)
     master_csv = fullfile(fp_EPI, 'QC_LC_ALL_SUBJECTS_LR_v2_3_1.csv');
     writetable(allRows, master_csv);
-    fprintf('\n✅ Master QC CSV saved: %s\n', master_csv);
+    fprintf('\n Master QC CSV saved: %s\n', master_csv);
 else
-    fprintf('\n⚠️ No entries for master CSV.\n');
+    fprintf('\n No entries for master CSV.\n');
 end
 
 fprintf('\n=== DONE: LC Seed-to-Voxel v2.3.1 ===\n');
@@ -544,7 +544,7 @@ if isempty(fn_cell), return; end
 for i = 1:numel(fn_cell)
     sid = get_subid_from_name(fn_cell{i});
     if isempty(sid)
-        fprintf('  ⚠️ Skipped (no Sub-ID): %s\n', fn_cell{i});
+        fprintf('   Skipped (no Sub-ID): %s\n', fn_cell{i});
         continue;
     end
     L(end+1).sid = sid; %#ok<SAGROW>
@@ -710,7 +710,7 @@ if same
     return
 end
 
-fprintf('⚙️ %s ≠ EPI grid → reslice NN via tmp (%s)\n', label, sid);
+fprintf(' %s ≠ EPI grid → reslice NN via tmp (%s)\n', label, sid);
 
 [~,nm,ext] = fileparts(infile);
 stamp = datestr(now,'yyyymmdd_HHMMSSFFF');
@@ -733,7 +733,7 @@ end
 function write_map(Vout, map3, fname)
 Vout.fname = fname;
 spm_write_vol(Vout, map3);
-fprintf('✅ wrote: %s\n', fname);
+fprintf(' wrote: %s\n', fname);
 end
 
 function [BandAmp, freqs_h, var_ts] = compute_band_amplitude_one_sided(ts, TR, band)
