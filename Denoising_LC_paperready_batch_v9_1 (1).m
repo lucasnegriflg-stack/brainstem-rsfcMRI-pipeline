@@ -97,7 +97,7 @@ if cfg.strictRepro
         maxNumCompThreads(1);
     catch
     end
-    fprintf('⚙️ Strict reproducibility mode: rng(0) + single-thread (where supported)\n');
+    fprintf(' Strict reproducibility mode: rng(0) + single-thread (where supported)\n');
 end
 
 %% -------------------- INPUTS (MultiSelect) --------------------
@@ -165,14 +165,14 @@ common_sid = intersect(intersect({C2_list.sid},{C3_list.sid}), intersect({EPI_li
 if isempty(common_sid)
     error('No common Subject-IDs found across required modalities (C2/C3/EPI/Motion).');
 end
-fprintf('\n✅ Matched subjects (required):\n');
+fprintf('\n Matched subjects (required):\n');
 disp(common_sid(:));
 
 %% -------------------- PROCESS LOOP --------------------
 for s = 1:numel(common_sid)
     sid = common_sid{s};
     fprintf('\n=============================================\n');
-    fprintf('▶ Subject: %s\n', sid);
+    fprintf(' Subject: %s\n', sid);
     fprintf('=============================================\n');
 
     % required
@@ -230,7 +230,7 @@ for s = 1:numel(common_sid)
     [nx,ny,nz,nt_check] = size(Y4);
     if nt_check ~= nt
         nt = nt_check;
-        fprintf('⚠️ Updated nt from data: %d\n', nt);
+        fprintf(' Updated nt from data: %d\n', nt);
     end
 
     %% ---------- Pre-denoise tSNR ----------
@@ -301,7 +301,7 @@ for s = 1:numel(common_sid)
     end
 
     nMaskVox = numel(brain_idx);
-    fprintf('✅ Analysis brain mask voxels (%s): %d | T1_intersect=%s | T1_primary=%s | LCC=%s\n', ...
+    fprintf(' Analysis brain mask voxels (%s): %d | T1_intersect=%s | T1_primary=%s | LCC=%s\n', ...
         sid, nMaskVox, tern(t1_intersection_done,'ON','OFF'), tern(t1_primary_used,'ON','OFF'), tern(lcc_applied,'ON','OFF'));
 
     if cfg.failIfMaskTooSmall && (nMaskVox < cfg.minMaskVox)
@@ -320,7 +320,7 @@ for s = 1:numel(common_sid)
     Vmask.dt = [2 0];         % uint8
     Vmask.pinfo = [1;0;0];
     spm_write_vol(Vmask, uint8(reshape(brain_mask, [nx,ny,nz])));
-    fprintf('✅ Analysis mask written (%s): %s\n', sid, Vmask.fname);
+    fprintf(' Analysis mask written (%s): %s\n', sid, Vmask.fname);
 
     %% ---------- Tissue masks + optional erosion ----------
     WMvol  = spm_read_vols(spm_vol(C2_epi)) > cfg.WM_thr;
@@ -346,9 +346,9 @@ for s = 1:numel(common_sid)
             nStrictCSFvox = nnz(strict_vec);
             if nStrictCSFvox > 10
                 StrictCSF = mean(Y2D_raw(:, strict_vec), 2, 'omitnan'); % raw scale here
-                fprintf('✅ Strict CSF mean added (%s): thr=%.2f, vox=%d\n', sid, cfg.CSF_strict_thr, nStrictCSFvox);
+                fprintf(' Strict CSF mean added (%s): thr=%.2f, vox=%d\n', sid, cfg.CSF_strict_thr, nStrictCSFvox);
             else
-                fprintf('⚠️ Strict CSF mean skipped (%s): too few voxels (%d)\n', sid, nStrictCSFvox);
+                fprintf(' Strict CSF mean skipped (%s): too few voxels (%d)\n', sid, nStrictCSFvox);
                 StrictCSF = [];
             end
         catch ME
@@ -363,7 +363,7 @@ for s = 1:numel(common_sid)
     [CSF_comp,kC, varCSF]  = acompcor_from_mask(Y2D_raw, CSF_mask, nt, sid, 'CSF', cfg);
     CompCor = zscore([WM_comp CSF_comp],0,1);
 
-    fprintf('✅ aCompCor (%s): WM %d PCs (%.1f%%), CSF %d PCs (%.1f%%)\n', ...
+    fprintf(' aCompCor (%s): WM %d PCs (%.1f%%), CSF %d PCs (%.1f%%)\n', ...
         sid, kW, varWM, kC, varCSF);
 
     %% ---------- Motion + Scrubbing ----------
@@ -375,7 +375,7 @@ for s = 1:numel(common_sid)
     end
 
     MotionReg = friston36(Motion);
-    fprintf('✅ Motion regressors (%s): %d columns (Friston-36)\n', sid, size(MotionReg,2));
+    fprintf(' Motion regressors (%s): %d columns (Friston-36)\n', sid, size(MotionReg,2));
 
     [FD, meanFD, medianFD, maxFD] = compute_FD_power(Motion);
 
@@ -405,7 +405,7 @@ for s = 1:numel(common_sid)
     end
 
     if scrubPerc > cfg.scrub_warnPct
-        warning('⚠️ >%.0f%% volumes flagged for scrubbing (%.1f%%, %s)', cfg.scrub_warnPct, scrubPerc, sid);
+        warning(' >%.0f%% volumes flagged for scrubbing (%.1f%%, %s)', cfg.scrub_warnPct, scrubPerc, sid);
     end
     fprintf('Scrubbing candidates (%s): %d/%d (%.1f%%)\n', sid, nScrub, nt, scrubPerc);
 
@@ -448,7 +448,7 @@ for s = 1:numel(common_sid)
     X_base_unf = X_base_unf(:, keep);
 
     writematrix(X_base_unf, csv_regs);
-    fprintf('✅ Regressors CSV (no GSR, unfiltered) saved (%s): %s\n', sid, csv_regs);
+    fprintf(' Regressors CSV (no GSR, unfiltered) saved (%s): %s\n', sid, csv_regs);
 
     %% ---------- Filtering (data + continuous regressors only) ----------
     [b,a] = butter(cfg.filter_order, Wn);
@@ -483,13 +483,13 @@ for s = 1:numel(common_sid)
     dof_noGSR = nt - rX1;
 
     if rX1 < size(X1,2)
-        fprintf('⚠️ Design matrix (no GSR) not full rank (rank=%d/%d, %s)\n', rX1, size(X1,2), sid);
+        fprintf(' Design matrix (no GSR) not full rank (rank=%d/%d, %s)\n', rX1, size(X1,2), sid);
     end
 
     if cfg.saveRegressorsBP
         csv_regs_bp = fullfile(outdir, ['RegressorsBP_' spm_file(EPI,'basename') '.csv']);
         writematrix(X1, csv_regs_bp);
-        fprintf('✅ RegressorsBP CSV (design used, no GSR) saved (%s): %s\n', sid, csv_regs_bp);
+        fprintf(' RegressorsBP CSV (design used, no GSR) saved (%s): %s\n', sid, csv_regs_bp);
     end
 
     if cfg.saveDesignMatMAT
@@ -503,7 +503,7 @@ for s = 1:numel(common_sid)
     out_nii1 = fullfile(outdir, [cfg.writePrefix spm_file(EPI,'filename')]);
     if exist(out_nii1,'file'), delete(out_nii1); end
     write_4d_nii_from_2d(Yclean1, V_EPI_all, out_nii1, cfg.writeFloat32);
-    fprintf('✅ Denoised EPI saved (no GSR) (%s): %s\n', sid, out_nii1);
+    fprintf(' Denoised EPI saved (no GSR) (%s): %s\n', sid, out_nii1);
 
     %% ---------- (Optional) GSR sensitivity pipeline ----------
     rX2 = NaN; nReg_GSR = NaN; dof_GSR = NaN;
@@ -526,13 +526,13 @@ for s = 1:numel(common_sid)
         dof_GSR = nt - rX2;
 
         if rX2 < size(X2,2)
-            fprintf('⚠️ Design matrix (with GSR) not full rank (rank=%d/%d, %s)\n', rX2, size(X2,2), sid);
+            fprintf(' Design matrix (with GSR) not full rank (rank=%d/%d, %s)\n', rX2, size(X2,2), sid);
         end
 
         if cfg.saveRegressorsBP
             csv_regs_bp_gsr = fullfile(outdir, ['RegressorsBP_GSR_' spm_file(EPI,'basename') '.csv']);
             writematrix(X2, csv_regs_bp_gsr);
-            fprintf('✅ RegressorsBP CSV (design used, with GSR) saved (%s): %s\n', sid, csv_regs_bp_gsr);
+            fprintf(' RegressorsBP CSV (design used, with GSR) saved (%s): %s\n', sid, csv_regs_bp_gsr);
         end
 
         if cfg.saveDesignMatMAT
@@ -544,7 +544,7 @@ for s = 1:numel(common_sid)
         out_nii2 = fullfile(outdir, [cfg.writePrefixG spm_file(EPI,'filename')]);
         if exist(out_nii2,'file'), delete(out_nii2); end
         write_4d_nii_from_2d(Yclean2, V_EPI_all, out_nii2, cfg.writeFloat32);
-        fprintf('✅ Denoised EPI saved (with GSR, sensitivity) (%s): %s\n', sid, out_nii2);
+        fprintf(' Denoised EPI saved (with GSR, sensitivity) (%s): %s\n', sid, out_nii2);
     end
 
     %% ---------- QC figure ----------
@@ -649,7 +649,7 @@ end
                                    'rankX_GSR','nReg_GSR','DOF_GSR', ...
                                    'QC_fail'});
     writetable(Ttab, qc_csv);
-    fprintf('✅ QC CSV saved (%s): %s\n', sid, qc_csv);
+    fprintf(' QC CSV saved (%s): %s\n', sid, qc_csv);
 
     %% ---------- Methods log ----------
     methods_txt = fullfile(outdir, ['METHODS_' spm_file(EPI,'basename') '.txt']);
@@ -694,7 +694,7 @@ if isempty(fn_cell), return; end
 for i = 1:numel(fn_cell)
     sid = get_subid_from_name(fn_cell{i});
     if isempty(sid)
-        fprintf('  ⚠️  Skipped (no Sub-ID): %s\n', fn_cell{i});
+        fprintf('    Skipped (no Sub-ID): %s\n', fn_cell{i});
         continue;
     end
     L(end+1).sid   = sid; %#ok<SAGROW>
@@ -760,7 +760,7 @@ else
 end
 
 if ~sameWM || ~sameCSF
-    fprintf('⚙️ WM/CSF masks resliced to EPI grid (NN) (%s).\n', sid);
+    fprintf(' WM/CSF masks resliced to EPI grid (NN) (%s).\n', sid);
 end
 end
 
@@ -839,7 +839,7 @@ try
     end
     t1mask_vec = m(:);
 
-    fprintf('✅ T1 brainmask built+resliced (%s): thr=%.2f\n', sid, cfg.t1_brain_thr);
+    fprintf(' T1 brainmask built+resliced (%s): thr=%.2f\n', sid, cfg.t1_brain_thr);
 catch ME
     warning('T1 brainmask failed (%s): %s', sid, ME.message);
     t1mask_vec = [];
@@ -869,7 +869,7 @@ try
         CSFvol_out = tmp;
     end
 
-    fprintf('✅ Tissue erosion applied (%s): WM iter=%d, CSF iter=%d\n', sid, cfg.erodeIterWM, cfg.erodeIterCSF);
+    fprintf(' Tissue erosion applied (%s): WM iter=%d, CSF iter=%d\n', sid, cfg.erodeIterWM, cfg.erodeIterCSF);
 catch
     warning('Image Processing Toolbox not available -> skipping tissue erosion (%s).', sid);
 end
