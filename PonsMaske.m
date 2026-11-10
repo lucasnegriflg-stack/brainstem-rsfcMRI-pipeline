@@ -1,4 +1,4 @@
- % ============================================================
+% ============================================================
 % nm_native_pons_precise.m  (SPM12)
 % ------------------------------------------------------------
 % Präzise Pipeline:
@@ -174,7 +174,7 @@ for k = 1:size(pairs,1)
     else
         mu = mean(vals(:),'omitnan'); sd = std(vals(:),'omitnan'); nv = nnz(mask);
     end
-    fprintf('📊 Pons (NM-native): mean=%.6g  SD=%.6g  vox=%d\n', mu, sd, nv);
+    fprintf(' Pons (NM-native): mean=%.6g  SD=%.6g  vox=%d\n', mu, sd, nv);
     results(end+1,:) = {id, mu, sd, nv};
 
     % Optional visueller Check:
@@ -185,7 +185,7 @@ end
 out_csv = fullfile(out_dir, 'NM_native_Pons_Signals.csv');
 try
     writecell(results, out_csv);
-    fprintf('\n✅ CSV gespeichert: %s\n', out_csv);
+    fprintf('\n CSV gespeichert: %s\n', out_csv);
 catch
     % Fallback für ältere MATLABs
     fid = fopen(out_csv,'w');
@@ -194,7 +194,7 @@ catch
         fprintf(fid, '%s,%.6g,%.6g,%d\n', results{r,1}, results{r,2}, results{r,3}, results{r,4});
     end
     fclose(fid);
-    fprintf('\n✅ CSV gespeichert (Fallback): %s\n', out_csv);
+    fprintf('\n CSV gespeichert (Fallback): %s\n', out_csv);
 end
 
-disp('✅ Fertig: Präzise Ponsmasken im NM-Raum & Signalwerte berechnet.');
+disp(' Fertig: Präzise Ponsmasken im NM-Raum & Signalwerte berechnet.');
