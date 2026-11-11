@@ -9,7 +9,7 @@ function Denoising_LC_paperready_batch_v9_4_rankrobust_PATCHED_STABLE()
 %%   (3) GSR: compute global signal consistently in filtered space from Y_bp (brain_idx)
 %%   (4) Output NIfTI: delete existing file before writing + set pinfo to avoid scaling ambiguity
 %%
-%% STABILITY PATCHES (Reviewer-safe engineering, no methodological upheaval):
+%% STABILITY PATCHES:
 %%   (A) STREAMING NIfTI writer: no huge 4D RAM allocation
 %%   (B) Deterministic aCompCor: PCA sign-consistency (prevents sign flips across runs)
 %%   (C) Robust regression solver: QR with column pivoting (rank-aware, stable)
